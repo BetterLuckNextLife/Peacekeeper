@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="ggym-peacekeeper:jar">
-    <output-path>$USER_HOME$/Downloads/purpur-server/plugins</output-path>
+    <output-path>$PROJECT_DIR$/../../../pojar/plugins</output-path>
     <root id="archive" name="ggym-peacekeeper.jar">
       <element id="module-output" name="ggym-peacekeeper" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-stdlib-jdk7/2.2.20-RC/kotlin-stdlib-jdk7-2.2.20-RC.jar" path-in-jar="/" />

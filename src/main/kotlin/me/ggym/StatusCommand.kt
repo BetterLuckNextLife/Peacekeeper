@@ -7,8 +7,9 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import org.bukkit.command.TabCompleter
 
-class StatusCommand : CommandExecutor {
+class StatusCommand : CommandExecutor, TabCompleter {
     override fun onCommand(
         sender: CommandSender,
         command: Command,
@@ -48,5 +49,28 @@ class StatusCommand : CommandExecutor {
         }
 
         return true
+    }
+
+    override fun onTabComplete(
+        sender: CommandSender,
+        command: Command,
+        alias: String,
+        args: Array<out String>
+    ): List<String> {
+        val completions = mutableListOf<String>()
+
+        when (args.size) {
+            1 -> {
+                Bukkit.getOnlinePlayers().forEach { player ->
+                    completions.add(player.name)
+                }
+                    // Фильтрация по введенному тексту
+                    return completions.filter {
+                        it.startsWith(args[1], ignoreCase = true)
+                    }.sorted()
+            }
+
+            else -> return emptyList()
+        }
     }
 }

@@ -4,24 +4,24 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.title.Title
 import net.milkbowl.vault.permission.Permission
+import org.bukkit.Bukkit
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
+import org.bukkit.command.TabCompleter
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 
 
-class SetstatusCommand(private val perms: Permission, private val plugin: JavaPlugin) : CommandExecutor{
+class SetstatusCommand(private val perms: Permission, private val plugin: JavaPlugin) : CommandExecutor, TabCompleter {
     override fun onCommand(
         sender: CommandSender,
         command: Command,
         label: String,
         args: Array<out String>
     ): Boolean {
-
-
 
         if (args.size < 1 || args.size > 3) {
             sender.sendMessage("Неверное количество аргументов!")
@@ -60,6 +60,51 @@ class SetstatusCommand(private val perms: Permission, private val plugin: JavaPl
         return true
     }
 
+    override fun onTabComplete(
+        sender: CommandSender,
+        command: Command,
+        alias: String,
+        args: Array<out String>
+    ): List<String> {
+        val completions = mutableListOf<String>()
+
+        when (args.size) {
+            1 -> {
+                // Автодополнение для первого аргумента (pvp/peace)
+                completions.addAll(listOf("pvp", "peace"))
+
+                // Фильтрация по введенному тексту
+                return completions.filter {
+                    it.startsWith(args[0].lowercase(), ignoreCase = true)
+                }.sorted()
+            }
+
+            2 -> {
+                // Автодополнение для второго аргумента (никнеймы)
+                // Проверяем, есть ли у отправителя права администратора
+                val hasAdminPermission = sender.hasPermission("status.admin") || sender is Player && sender.isOp
+
+                if (hasAdminPermission) {
+                    // Для админов показываем всех онлайн-игроков
+                    Bukkit.getOnlinePlayers().forEach { player ->
+                        completions.add(player.name)
+                    }
+                } else {
+                    // Для обычных пользователей показываем только их самих
+                    if (sender is Player) {
+                        completions.add(sender.name)
+                    }
+                }
+
+                // Фильтрация по введенному тексту
+                return completions.filter {
+                    it.startsWith(args[1], ignoreCase = true)
+                }.sorted()
+            }
+
+            else -> return emptyList()
+        }
+    }
     // MUST BE USED BY PLAYERS THEMSELVES
     fun applyStatusUser(player: Player, mode: String) {
 
