@@ -23,3 +23,6 @@ permissions:
   status.edit:
     description: "Возможность редактировать свой статус"
     default: true
+  status.conversion:
+    description: "Статус меняется"
+    default: false

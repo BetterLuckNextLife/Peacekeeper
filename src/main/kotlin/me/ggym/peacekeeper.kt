@@ -1,14 +1,13 @@
 package me.ggym
 
-import org.bukkit.plugin.java.JavaPlugin
 import net.milkbowl.vault.permission.Permission
+import org.bukkit.plugin.java.JavaPlugin
 
 class peacekeeper : JavaPlugin() {
 
     lateinit var perms: Permission
 
     override fun onEnable() {
-
 
         val rsp = server.servicesManager.getRegistration(Permission::class.java)
         if (rsp != null) {

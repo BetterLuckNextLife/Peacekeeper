@@ -13,10 +13,14 @@ import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
+import java.util.UUID
 
 
-class SetstatusCommand(private val perms: Permission, private val plugin: JavaPlugin) : CommandExecutor, TabCompleter {
-    override fun onCommand(
+class SetstatusCommand(private val perms: Permission, private val plugin: JavaPlugin) : CommandExecutor, TabCompleter{
+    private val pendingTasks = mutableMapOf<UUID, Int>()
+    private val taskStartTimes = mutableMapOf<UUID, Long>()
+
+     override fun onCommand(
         sender: CommandSender,
         command: Command,
         label: String,
@@ -24,35 +28,65 @@ class SetstatusCommand(private val perms: Permission, private val plugin: JavaPl
     ): Boolean {
 
         if (args.size < 1 || args.size > 3) {
-            sender.sendMessage("Неверное количество аргументов!")
+            sender.sendMessage("/setstatus <PvP/Peace>")
             return true
         }
 
         val mode: String = args[0]
 
         if (mode != "pvp" && mode != "peace") {
-            sender.sendMessage("Неверные аргументы!")
+            sender.sendMessage("/setstatus <PvP/Peace>")
             return true
         }
 
         // Если sender это игрок
         if (sender is Player && sender.hasPermission("status.admin") == false) {
+            sender.sendMessage(Component.text("edit: ${sender.hasPermission("status.edit")}", NamedTextColor.RED))
+            sender.sendMessage(Component.text("conversion: ${sender.hasPermission("status.conversion")}", NamedTextColor.RED))
+            sender.sendMessage(Component.text("peace: ${sender.hasPermission("status.peace")}", NamedTextColor.RED))
+            sender.sendMessage(Component.text("pvp: ${sender.hasPermission("status.pvp")}", NamedTextColor.RED))
             if (sender.hasPermission("status.edit")) {
-                applyStatusUser(sender, mode)
-            } else {
+                sender.sendMessage(Component.text("Через 24 часа статус будет изменен", NamedTextColor.LIGHT_PURPLE))
+
+                val taskId = plugin.server.scheduler.runTaskLater(plugin, Runnable {
+                    applyStatusUser(sender, mode)
+                    pendingTasks.remove(sender.uniqueId)
+                    taskStartTimes.remove(sender.uniqueId)
+                }, 1000L).taskId
+
+                pendingTasks[sender.uniqueId] = taskId
+                taskStartTimes[sender.uniqueId] = System.currentTimeMillis()
+
+                perms.playerRemove(sender, "status.edit")
+                perms.playerAdd(sender, "status.conversion")
+            } else if (sender.hasPermission("status.conversion")) {
+                val currentTimeStart = taskStartTimes[sender.uniqueId] ?: return true
+                val elapsed = System.currentTimeMillis() - currentTimeStart
+                val remaining = 1000L - elapsed
+                val hours = remaining / (60 * 60 * 1000)
+                val minutes = (remaining % (60 * 60 * 1000)) / (60 * 1000)
+                sender.sendMessage(Component.text("Изменения вступят в силу через ${hours}:${minutes}", NamedTextColor.LIGHT_PURPLE))
+            }
+            else {
                 sender.sendMessage(
                     Component.text("У вас нет права задавать свой статус!", NamedTextColor.RED)
                 )
             }
         // Если sender это консоль или админ
         } else if (!(sender is Player) || sender.hasPermission("status.admin") == true) {
-            val mode = args[0]
             val name = args[1]
             val player: Player? = plugin.server.getPlayer(name)
             if (player == null) {
                 sender.sendMessage("Игрок не найден!")
                 plugin.logger.info("Игрок не найден!")
                 return true
+            }
+
+            if (player.hasPermission("status.conversion")) {
+                val taskId = pendingTasks[player.uniqueId] ?: return true
+                plugin.server.scheduler.cancelTask(taskId)
+                pendingTasks.remove(player.uniqueId)
+                taskStartTimes.remove(player.uniqueId)
             }
             applyStatusUser(player, mode)
         }
@@ -114,6 +148,11 @@ class SetstatusCommand(private val perms: Permission, private val plugin: JavaPl
         }
         if (player.hasPermission("status.pvp")) {
             perms.playerRemove(player, "status.pvp")
+        }
+
+        if (player.hasPermission("status.conversion")) {
+            perms.playerRemove(player, "status.conversion")
+            perms.playerAdd(player, "status.edit")
         }
 
         // Добавляем новый статус
