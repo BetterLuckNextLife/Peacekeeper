@@ -35,17 +35,16 @@ class SetstatusCommand(private val perms: Permission, private val plugin: JavaPl
             return true
         }
 
-        // If sender is not OP or console
+        // Если sender это игрок
         if (sender is Player && sender.hasPermission("status.admin") == false) {
             if (sender.hasPermission("status.edit")) {
                 applyStatusUser(sender, mode)
             } else {
-                // Notify the player that permission is needed
                 sender.sendMessage(
                     Component.text("У вас нет права задавать свой статус!", NamedTextColor.RED)
                 )
             }
-        // If sender is OP or console
+        // Если sender это консоль или админ
         } else if (!(sender is Player) || sender.hasPermission("status.admin") == true) {
             val mode = args[0]
             val name = args[1]
@@ -105,10 +104,11 @@ class SetstatusCommand(private val perms: Permission, private val plugin: JavaPl
             else -> return emptyList()
         }
     }
-    // MUST BE USED BY PLAYERS THEMSELVES
+
+    // Задаёт статус игрока
     fun applyStatusUser(player: Player, mode: String) {
 
-        // Remove old status permissions
+        // Убираем прошлые статусы, если такие были
         if (player.hasPermission("status.peace")) {
             perms.playerRemove(player, "status.peace")
         }
@@ -116,12 +116,12 @@ class SetstatusCommand(private val perms: Permission, private val plugin: JavaPl
             perms.playerRemove(player, "status.pvp")
         }
 
-        // Add new status permission
+        // Добавляем новый статус
         perms.playerAdd(player, "status.$mode")
         plugin.logger.info("Set $mode status for ${player.name}!")
 
         if (player.isOnline) {
-        // SXF, VFX and text
+        // SXF, VFX и текст
         val statusText = when (mode) {
             "pvp" -> Component.text("PvP", NamedTextColor.RED)
             "peace" -> Component.text("Мирный", NamedTextColor.AQUA)
@@ -140,7 +140,7 @@ class SetstatusCommand(private val perms: Permission, private val plugin: JavaPl
             else -> Sound.BLOCK_PALE_HANGING_MOSS_IDLE
         }
 
-        // Title and chat message
+        // Создаём title и сообщение
         val title = Title.title(
             Component.text("Статус", NamedTextColor.GREEN),
             statusText, // используем тот же компонент, что и для чата
@@ -152,7 +152,7 @@ class SetstatusCommand(private val perms: Permission, private val plugin: JavaPl
         )
         val msg = Component.text("Статус ", NamedTextColor.GREEN).append(statusText)
 
-        // Notify the user using chat and title
+        // Уведомляем пользователя
         player.sendMessage(msg)
         player.showTitle(title)
         player.playSound(player.location, sfx, 1.0f, 1.0f)
