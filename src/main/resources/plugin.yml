@@ -1,0 +1,15 @@
+name: GGymPeacekeeper
+version: '1.0-SNAPSHOT'
+main: me.ggym.peacekeeper
+api-version: '1.21'
+commands:
+  status:
+    description: "Показывает статус игрока (PvP или Мирный)"
+    usage: "/status <nickname>"
+permissions:
+  status.peaceful:
+    description: "Режим мирного"
+    default: false
+  status.pvp:
+    description: "Режим PvP"
+    default: false
