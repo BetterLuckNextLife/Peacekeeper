@@ -2,10 +2,14 @@ name: GGymPeacekeeper
 version: '1.0-SNAPSHOT'
 main: me.ggym.peacekeeper
 api-version: '1.21'
+depend: [Vault]
 commands:
   status:
     description: "Показывает статус игрока (PvP или Мирный)"
     usage: "/status <nickname>"
+  setstatus:
+    description:  "Позволяет задать статус игрока"
+    usage: "/setstatus <PvP/Peace> <nickname>"
 permissions:
   status.peaceful:
     description: "Режим мирного"
@@ -13,3 +17,9 @@ permissions:
   status.pvp:
     description: "Режим PvP"
     default: false
+  status.admin:
+    description: "Возможность редактироватать статусы других игроков"
+    default: false
+  status.edit:
+    description:  "Возможность редактировать свой статус"
+    default: true
