@@ -48,29 +48,31 @@ class SetstatusCommand(private val perms: Permission, private val plugin: JavaPl
             if (sender.hasPermission("status.edit")) {
                 sender.sendMessage(Component.text("Через 24 часа статус будет изменен", NamedTextColor.LIGHT_PURPLE))
 
+                val delayTicks = 20L * 5
+
                 val taskId = plugin.server.scheduler.runTaskLater(plugin, Runnable {
                     applyStatusUser(sender, mode)
                     pendingTasks.remove(sender.uniqueId)
                     taskStartTimes.remove(sender.uniqueId)
-                }, 1000L).taskId
+                }, delayTicks).taskId
 
                 pendingTasks[sender.uniqueId] = taskId
-                taskStartTimes[sender.uniqueId] = System.currentTimeMillis()
+                taskStartTimes[sender.uniqueId] = System.currentTimeMillis() + delayTicks * 50
 
                 perms.playerRemove(sender, "status.edit")
                 perms.playerAdd(sender, "status.conversion")
+
             } else if (sender.hasPermission("status.conversion")) {
-                val currentTimeStart = taskStartTimes[sender.uniqueId] ?: return true
-                val elapsed = System.currentTimeMillis() - currentTimeStart
-                val remaining = 1000L - elapsed
-                val hours = remaining / (60 * 60 * 1000)
-                val minutes = (remaining % (60 * 60 * 1000)) / (60 * 1000)
-                sender.sendMessage(Component.text("Изменения вступят в силу через ${hours}:${minutes}", NamedTextColor.LIGHT_PURPLE))
+                val endTime = taskStartTimes[sender.uniqueId] ?: return true
+                val remaining = endTime - System.currentTimeMillis()
+                val seconds = remaining / 1000
+                val minutes = remaining / 1000 / 60
+                val hours = remaining / 1000 / 60 / 60
+                sender.sendMessage(Component.text("Изменения вступят в силу через ${hours}:${minutes}:${seconds}", NamedTextColor.LIGHT_PURPLE))
+
             }
             else {
-                sender.sendMessage(
-                    Component.text("У вас нет права задавать свой статус!", NamedTextColor.RED)
-                )
+                sender.sendMessage(Component.text("У вас нет права задавать свой статус!", NamedTextColor.RED))
             }
         // Если sender это консоль или админ
         } else if (!(sender is Player) || sender.hasPermission("status.admin")) {
