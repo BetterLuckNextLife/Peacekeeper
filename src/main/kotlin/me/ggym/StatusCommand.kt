@@ -25,7 +25,7 @@ class StatusCommand : CommandExecutor, TabCompleter {
 
         if (target == null) {
             sender.sendMessage(
-                Component.text("Команда применима только к игрокам!", NamedTextColor.RED)
+                Component.text("/status <nickname>", NamedTextColor.RED)
             )
             return true
         }
@@ -57,20 +57,18 @@ class StatusCommand : CommandExecutor, TabCompleter {
         alias: String,
         args: Array<out String>
     ): List<String> {
-        val completions = mutableListOf<String>()
+        if (args.size == 1) {
+            val completions = mutableListOf<String>()
 
-        when (args.size) {
-            1 -> {
-                Bukkit.getOnlinePlayers().forEach { player ->
-                    completions.add(player.name)
-                }
-                    // Фильтрация по введенному тексту
-                    return completions.filter {
-                        it.startsWith(args[1], ignoreCase = true)
-                    }.sorted()
+            Bukkit.getOnlinePlayers().forEach { player ->
+                completions.add(player.name)
             }
 
-            else -> return emptyList()
+            return completions.filter {
+                it.startsWith(args[0], ignoreCase = true)
+            }.sorted()
         }
+
+        return emptyList()
     }
 }
