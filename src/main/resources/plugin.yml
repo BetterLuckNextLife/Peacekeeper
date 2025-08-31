@@ -1,6 +1,6 @@
 name: GGymPeacekeeper
 version: '1.0-SNAPSHOT'
-main: me.ggym.peacekeeper
+main: me.ggym.Peacekeeper
 api-version: '1.21'
 depend: [Vault]
 commands:

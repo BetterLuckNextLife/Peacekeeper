@@ -40,7 +40,7 @@ class SetstatusCommand(private val perms: Permission, private val plugin: JavaPl
         }
 
         // Если sender это игрок
-        if (sender is Player && sender.hasPermission("status.admin") == false) {
+        if (sender is Player && !sender.hasPermission("status.admin")) {
             sender.sendMessage(Component.text("edit: ${sender.hasPermission("status.edit")}", NamedTextColor.RED))
             sender.sendMessage(Component.text("conversion: ${sender.hasPermission("status.conversion")}", NamedTextColor.RED))
             sender.sendMessage(Component.text("peace: ${sender.hasPermission("status.peace")}", NamedTextColor.RED))
@@ -73,7 +73,7 @@ class SetstatusCommand(private val perms: Permission, private val plugin: JavaPl
                 )
             }
         // Если sender это консоль или админ
-        } else if (!(sender is Player) || sender.hasPermission("status.admin") == true) {
+        } else if (!(sender is Player) || sender.hasPermission("status.admin")) {
             val name = args[1]
             val player: Player? = plugin.server.getPlayer(name)
             if (player == null) {
