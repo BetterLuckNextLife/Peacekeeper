@@ -17,8 +17,10 @@ import java.util.UUID
 
 
 class SetstatusCommand(private val perms: Permission, private val plugin: JavaPlugin) : CommandExecutor, TabCompleter{
+
     private val pendingTasks = mutableMapOf<UUID, Int>()
     private val taskStartTimes = mutableMapOf<UUID, Long>()
+    val delayTicks = 20L * plugin.config.getInt("delaySeconds")
 
      override fun onCommand(
         sender: CommandSender,
@@ -58,12 +60,13 @@ class SetstatusCommand(private val perms: Permission, private val plugin: JavaPl
                     return true
                 }
 
-                sender.sendMessage(Component.text("Через 24 часа статус будет изменен", NamedTextColor.LIGHT_PURPLE))
+                sender.sendMessage(Component.text("Скоро статус будет изменен! Чтобы узнать, сколько осталось ждать введите команду заново.", NamedTextColor.LIGHT_PURPLE))
+                sender.playSound(sender.location, Sound.BLOCK_AMETHYST_BLOCK_STEP, 1.0f, 1.0f)
 
                 perms.playerRemove(sender, "status.edit")
                 perms.playerAdd(sender, "status.conversion")
 
-                val delayTicks = 20L * 5
+
 
                 val taskId = plugin.server.scheduler.runTaskLater(plugin, Runnable {
                     applyStatusUser(sender, mode)

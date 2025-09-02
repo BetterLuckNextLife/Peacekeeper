@@ -8,7 +8,9 @@ class Peacekeeper : JavaPlugin() {
     lateinit var perms: Permission
 
     override fun onEnable() {
+        saveDefaultConfig()
         logger.info("Запуск Peacekeeper...")
+
 
         val rsp = server.servicesManager.getRegistration(Permission::class.java)
         if (rsp != null) {
