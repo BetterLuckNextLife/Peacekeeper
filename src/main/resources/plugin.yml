@@ -11,14 +11,14 @@ commands:
     description: "Позволяет задать статус игрока"
     usage: "/setstatus <PvP/Peace> <nickname>"
 permissions:
-  status.peaceful:
+  status.peace:
     description: "Режим мирного"
     default: false
   status.pvp:
     description: "Режим PvP"
     default: false
   status.admin:
-    description: "Возможность редактироватать статусы других игроков"
+    description: "Возможность редактировать статусы других игроков"
     default: false
   status.edit:
     description: "Возможность редактировать свой статус"

@@ -31,7 +31,7 @@ class StatusCommand : CommandExecutor, TabCompleter {
         }
 
         val status = when {
-            target.hasPermission("status.peaceful") -> "Мирный"
+            target.hasPermission("status.peace") -> "Мирный"
             target.hasPermission("status.pvp") -> "PvP"
             else -> "не задан"
         }
