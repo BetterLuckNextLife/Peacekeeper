@@ -46,7 +46,22 @@ class SetstatusCommand(private val perms: Permission, private val plugin: JavaPl
             sender.sendMessage(Component.text("peace: ${sender.hasPermission("status.peace")}", NamedTextColor.RED))
             sender.sendMessage(Component.text("pvp: ${sender.hasPermission("status.pvp")}", NamedTextColor.RED))
             if (sender.hasPermission("status.edit")) {
+
+                val currentMode: String = when {
+                    sender.hasPermission("status.pvp") -> "pvp"
+                    sender.hasPermission("status.peace") -> "peace"
+                    else -> "unset"
+                }
+
+                if (mode == currentMode) {
+                    sender.sendMessage(Component.text("У вас уже такой статус!", NamedTextColor.RED))
+                    return true
+                }
+
                 sender.sendMessage(Component.text("Через 24 часа статус будет изменен", NamedTextColor.LIGHT_PURPLE))
+
+                perms.playerRemove(sender, "status.edit")
+                perms.playerAdd(sender, "status.conversion")
 
                 val delayTicks = 20L * 5
 
@@ -58,9 +73,6 @@ class SetstatusCommand(private val perms: Permission, private val plugin: JavaPl
 
                 pendingTasks[sender.uniqueId] = taskId
                 taskStartTimes[sender.uniqueId] = System.currentTimeMillis() + delayTicks * 50
-
-                perms.playerRemove(sender, "status.edit")
-                perms.playerAdd(sender, "status.conversion")
 
             } else if (sender.hasPermission("status.conversion")) {
                 val endTime = taskStartTimes[sender.uniqueId] ?: return true
